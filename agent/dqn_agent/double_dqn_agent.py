@@ -437,22 +437,31 @@ class Agent:
         import glob
         import os
         
-        ckpts_dir = Path(__file__).parent / "ckpts" / "ddqn"
         checkpoints = []
-        if ckpts_dir.exists():
-            search_pattern = os.path.join(ckpts_dir, "**", "*.pth")
+        
+        # 1. Search local ckpts folder first
+        local_ckpts_dir = Path(__file__).parent / "ckpts" / "ddqn"
+        if local_ckpts_dir.exists():
+            search_pattern = os.path.join(local_ckpts_dir, "**", "*.pth")
             checkpoints = glob.glob(search_pattern, recursive=True)
+        
+        # 2. If not found, search root ckpts folder
+        if not checkpoints:
+            root_ckpts_dir = Path(__file__).resolve().parent.parent.parent / "ckpts" / "ddqn"
+            if root_ckpts_dir.exists():
+                search_pattern = os.path.join(root_ckpts_dir, "**", "*.pth")
+                checkpoints = glob.glob(search_pattern, recursive=True)
         
         if checkpoints:
             latest_checkpoint = max(checkpoints, key=os.path.getmtime)
-            print(f"[INFO] DoubleDQNAgent dynamically loaded checkpoint: {latest_checkpoint}")
             self._load_checkpoint(latest_checkpoint)
         else:
             # Fallback explicitly just in case they never run training locally and submit standard weights
             fallback = Path(__file__).parent / "2737502_global_step.pth"
             if fallback.exists():
-                print(f"[INFO] DoubleDQNAgent loaded fallback: {fallback}")
                 self._load_checkpoint(str(fallback))
+            else:
+                print("[ERROR] DoubleDQNAgent found no checkpoints! Random actions will be used.")
 
     def _load_checkpoint(self, checkpoint_path):
         try:

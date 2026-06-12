@@ -460,18 +460,26 @@ class Agent:
         import glob
         import os
         
-        ckpts_dir = Path(__file__).parent / "ckpts" / "dueling_ddqn"
         checkpoints = []
-        if ckpts_dir.exists():
-            search_pattern = os.path.join(ckpts_dir, "**", "*.pth")
+        
+        # 1. Search local ckpts folder first
+        local_ckpts_dir = Path(__file__).parent / "ckpts" / "dueling_ddqn"
+        if local_ckpts_dir.exists():
+            search_pattern = os.path.join(local_ckpts_dir, "**", "*.pth")
             checkpoints = glob.glob(search_pattern, recursive=True)
+        
+        # 2. If not found, search root ckpts folder
+        if not checkpoints:
+            root_ckpts_dir = Path(__file__).resolve().parent.parent.parent / "ckpts" / "dueling_ddqn"
+            if root_ckpts_dir.exists():
+                search_pattern = os.path.join(root_ckpts_dir, "**", "*.pth")
+                checkpoints = glob.glob(search_pattern, recursive=True)
         
         if checkpoints:
             latest_checkpoint = max(checkpoints, key=os.path.getmtime)
-            print(f"[INFO] DuelingDDQNAgent dynamically loaded checkpoint: {latest_checkpoint}")
             self._load_checkpoint(latest_checkpoint)
         else:
-            print("[WARNING] DuelingDDQNAgent found no checkpoints! Random actions will be used.")
+            print("[ERROR] DuelingDDQNAgent found no checkpoints! Random actions will be used.")
 
     def _load_checkpoint(self, checkpoint_path):
         try:
