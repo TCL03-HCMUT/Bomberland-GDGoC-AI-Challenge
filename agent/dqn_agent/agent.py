@@ -401,18 +401,6 @@ def train_dqn(user_id=0, enemy_type="simple", num_episodes=100, max_steps=500, s
                     )
                     loss_history.append(loss)
 
-                    if save_model and user_agent.global_step % 500 == 0:
-                        model_folder = f"ckpts/dqn/dqn_{enemy_type}_{num_episodes}_episodes_{max_steps}_steps_{seed}_seed"
-                        model_path = f"{model_folder}/{user_agent.global_step}_global_step.pth"
-                        save_model_fn(user_agent.q_net, 
-                                    user_agent.optimizer, 
-                                    user_agent.global_step, 
-                                    user_agent.epsilon, 
-                                    user_agent.lr, 
-                                    input_spec,
-                                    num_actions,
-                                    model_path)
-
                 # 6. Update
                 prev_obs  = obs
                 obs       = next_obs
@@ -426,6 +414,19 @@ def train_dqn(user_id=0, enemy_type="simple", num_episodes=100, max_steps=500, s
             epsilon = max(epsilon_min, epsilon * epsilon_decay)
             if ep % 30 == 0:
                 user_agent.update_target_network()
+                
+            if save_model and (ep + 1) % 200 == 0:
+                model_folder = f"ckpts/dqn/dqn_{enemy_type}_{num_episodes}_episodes_{max_steps}_steps_{seed}_seed"
+                model_path = f"{model_folder}/{user_agent.global_step}_global_step.pth"
+                save_model_fn(user_agent.q_net, 
+                            user_agent.optimizer, 
+                            user_agent.global_step, 
+                            user_agent.epsilon, 
+                            user_agent.lr, 
+                            input_spec,
+                            num_actions,
+                            model_path)
+
             pbar.update(1)
             pbar.set_postfix(reward=f"{total_reward:.2f}", epsilon=f"{epsilon:.3f}")
 
