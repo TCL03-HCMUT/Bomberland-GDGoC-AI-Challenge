@@ -314,7 +314,7 @@ def train_dueling_ddqn(user_id=0, enemy_type="simple", num_episodes=100, max_ste
 
     epsilon_start      = 1.0
     epsilon_min        = 0.05
-    epsilon_decay      = 0.995
+    epsilon_decay      = 0.998
     epsilon            = epsilon_start
     batch_size         = 64
     lr                 = 1e-3
@@ -326,7 +326,7 @@ def train_dueling_ddqn(user_id=0, enemy_type="simple", num_episodes=100, max_ste
     num_actions = 6
 
     user_agent = DuelingDDQNTrainingAgent(user_id, input_spec, num_actions, lr=lr, device="cuda" if torch.cuda.is_available() else "cpu", pretrained_model=pretrained_model)
-    buffer = ReplayBuffer(capacity=10_000, map_shape=input_spec[0], aux_dim=input_spec[1])
+    buffer = ReplayBuffer(capacity=150_000, map_shape=input_spec[0], aux_dim=input_spec[1])
 
     global_step = 0
     loss_history = []
@@ -396,7 +396,7 @@ def train_dueling_ddqn(user_id=0, enemy_type="simple", num_episodes=100, max_ste
                     break
 
             epsilon = max(epsilon_min, epsilon * epsilon_decay)
-            if ep % 10 == 0:
+            if ep % 30 == 0:
                 user_agent.update_target_network()
             pbar.update(1)
             pbar.set_postfix(reward=f"{total_reward:.2f}", epsilon=f"{epsilon:.3f}")
