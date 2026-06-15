@@ -312,7 +312,7 @@ def train_dueling_ddqn(user_id=0, enemy_type="simple", num_episodes=100, max_ste
     else:
         raise ValueError(f"Invalid enemy type: {enemy_type}")
 
-    epsilon_start      = 1.0
+    epsilon_start      = 0.5
     epsilon_min        = 0.05
     epsilon_decay      = 0.998
     epsilon            = epsilon_start
